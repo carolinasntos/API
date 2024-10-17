@@ -169,29 +169,42 @@ export const getUsuarioById = async (req, res) => {
   }
 };
 
-// Crear un nuevo usuario
+// Crear un nuevo usuario (POST)
 export const createUsuarios = async (req, res) => {
-  try {
-    const { nombre, apellido, email, contraseña } = req.body;
-
-    const result = await pool.query(
-      'INSERT INTO usuario (nombre, apellido, email, contraseña) VALUES ($1, $2, $3, $4) RETURNING idusuario',
-      [nombre, apellido, email, contraseña]
-    );
-
-    const newUser = result.rows[0];
-
-    res.send({
-      id: newUser.idusuario,
-      nombre,
-      apellido,
-      email,
-      contraseña
-    });
-  } catch (error) {
-    console.error('Error al crear usuario:', error);
-    res.status(500).send('Hubo un error al crear el usuario');
-  }
+    try {
+      const { nombre, apellido, email, contraseña } = req.body;  // Extraemos los datos del body
+  
+      // Validar que todos los campos requeridos estén presentes
+      if (!nombre || !apellido || !email || !contraseña) {
+        return res.status(400).json({ message: 'Todos los campos son obligatorios' });
+      }
+  
+      // Insertar un nuevo usuario en la base de datos
+      const result = await pool.query(
+        'INSERT INTO usuario (nombre, apellido, email, contraseña) VALUES ($1, $2, $3, $4) RETURNING idusuario',
+        [nombre, apellido, email, contraseña]
+      );
+  
+      const newUser = result.rows[0];  // El nuevo usuario creado
+  
+      res.status(201).json({
+        message: 'Usuario creado exitosamente',
+        usuario: {
+          id: newUser.idusuario,
+          nombre,
+          apellido,
+          email,
+          contraseña
+        }
+      });
+    } catch (error) {
+      console.error('Error al crear usuario:', error);
+      res.status(500).json({
+        message: 'Hubo un error al crear el usuario',
+        error: error.message,
+        stack: error.stack,
+      });
+    }
 };
 
 // Actualizar un usuario
