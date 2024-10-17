@@ -1,4 +1,4 @@
-import sql from 'mssql';
+/*import sql from 'mssql';
 import { pool } from '../db.js';
 //Hola
 
@@ -128,4 +128,116 @@ export const deleteUsuarios = async (req, res) => {
         console.error('Error al eliminar usuario:', error);
         res.status(500).json({ message: 'Hubo un error al eliminar el usuario' });
     }
+};*/
+
+import { pool } from '../db.js';
+
+// Obtener todos los usuarios
+export const getUsuarios = async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM usuario');
+    res.json(result.rows);  // En PostgreSQL, los resultados están en `rows`
+  } catch (error) {
+    console.error('Error al obtener usuarios:', error);
+    res.status(500).send('Hubo un error al obtener los usuarios');
+  }
+};
+
+// Obtener un usuario por ID
+export const getUsuarioById = async (req, res) => {
+  try {
+    const { idUsuario } = req.params;
+
+    if (isNaN(idUsuario)) {
+      return res.status(400).json({ message: 'ID de usuario inválido' });
+    }
+
+    const result = await pool.query('SELECT * FROM usuario WHERE idusuario = $1', [idUsuario]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error al obtener el usuario:', error);
+    res.status(500).json({
+      message: 'Hubo un error al obtener el usuario',
+      error: error.message,
+      stack: error.stack,
+    });
+  }
+};
+
+// Crear un nuevo usuario
+export const createUsuarios = async (req, res) => {
+  try {
+    const { nombre, email, password, edad } = req.body;
+
+    const result = await pool.query(
+      'INSERT INTO usuario (nombre, email, password, edad) VALUES ($1, $2, $3, $4) RETURNING idusuario',
+      [nombre, email, password, edad]
+    );
+
+    const newUser = result.rows[0];
+
+    res.send({
+      id: newUser.idusuario,
+      nombre,
+      email,
+      password,
+      edad,
+    });
+  } catch (error) {
+    console.error('Error al crear usuario:', error);
+    res.status(500).send('Hubo un error al crear el usuario');
+  }
+};
+
+// Actualizar un usuario
+export const updateUsuarios = async (req, res) => {
+  try {
+    const { idUsuario } = req.params;
+    const { nombre, email, password, edad } = req.body;
+
+    if (!nombre || !email || !password || !edad) {
+      return res.status(400).json({ message: 'Todos los campos son obligatorios' });
+    }
+
+    const result = await pool.query(
+      'UPDATE usuario SET nombre = $1, email = $2, password = $3, edad = $4 WHERE idusuario = $5',
+      [nombre, email, password, edad, idUsuario]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    res.json({ message: 'Usuario actualizado correctamente' });
+  } catch (error) {
+    console.error('Error al actualizar el usuario:', error);
+    res.status(500).json({ message: 'Hubo un error al actualizar el usuario' });
+  }
+};
+
+// Eliminar un usuario
+export const deleteUsuarios = async (req, res) => {
+  try {
+    const { idUsuario } = req.params;
+
+    if (isNaN(idUsuario)) {
+      return res.status(400).json({ message: 'ID de usuario inválido' });
+    }
+
+    const result = await pool.query('DELETE FROM usuario WHERE idusuario = $1', [idUsuario]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    res.json({ message: `Usuario con id ${idUsuario} eliminado correctamente` });
+  } catch (error) {
+    console.error('Error al eliminar usuario:', error);
+    res.status(500).json({ message: 'Hubo un error al eliminar el usuario' });
+  }
 };
