@@ -27,15 +27,14 @@ export const connect = async () => {
     }
 };*/
 
-import { Pool } from 'pg';
+import pkg from 'pg';
+const { Pool } = pkg;
 import { DATABASE_URL } from './config.js';
 
 // Configuración de la conexión a PostgreSQL
 export const pool = new Pool({
   connectionString: DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false // Omitir si no necesitas SSL
-  }
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false // Desactiva SSL si no es producción
 });
 
 // Función para conectarse a la base de datos
