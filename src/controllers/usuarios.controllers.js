@@ -1,5 +1,6 @@
 import sql from 'mssql';
 import { pool } from '../db.js';
+//Hola
 
 export const getUsuarios = async (req, res) => {
     try {
