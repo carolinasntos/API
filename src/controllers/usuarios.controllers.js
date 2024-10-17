@@ -172,11 +172,11 @@ export const getUsuarioById = async (req, res) => {
 // Crear un nuevo usuario
 export const createUsuarios = async (req, res) => {
   try {
-    const { nombre, email, password, edad } = req.body;
+    const { nombre, apellido, email, contraseña } = req.body;
 
     const result = await pool.query(
-      'INSERT INTO usuario (nombre, email, password, edad) VALUES ($1, $2, $3, $4) RETURNING idusuario',
-      [nombre, email, password, edad]
+      'INSERT INTO usuario (nombre, apellido, email, contraseña) VALUES ($1, $2, $3, $4) RETURNING idusuario',
+      [nombre, apellido, email, contraseña]
     );
 
     const newUser = result.rows[0];
@@ -184,9 +184,9 @@ export const createUsuarios = async (req, res) => {
     res.send({
       id: newUser.idusuario,
       nombre,
+      apellido,
       email,
-      password,
-      edad,
+      contraseña
     });
   } catch (error) {
     console.error('Error al crear usuario:', error);
@@ -198,15 +198,15 @@ export const createUsuarios = async (req, res) => {
 export const updateUsuarios = async (req, res) => {
   try {
     const { idUsuario } = req.params;
-    const { nombre, email, password, edad } = req.body;
+    const { nombre, apellido, email, contraseña } = req.body;
 
-    if (!nombre || !email || !password || !edad) {
+    if (!nombre || !apellido || !email || !contraseña) {
       return res.status(400).json({ message: 'Todos los campos son obligatorios' });
     }
 
     const result = await pool.query(
-      'UPDATE usuario SET nombre = $1, email = $2, password = $3, edad = $4 WHERE idusuario = $5',
-      [nombre, email, password, edad, idUsuario]
+      'UPDATE usuario SET nombre = $1, apellido = $2, email = $3, contraseña = $4 WHERE idusuario = $5',
+      [nombre, apellido, email, contraseña, idUsuario]
     );
 
     if (result.rowCount === 0) {
