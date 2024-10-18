@@ -16,4 +16,6 @@ import { config } from 'dotenv';
 config();
 
 export const PORT = process.env.PORT || 3000;
-export const DATABASE_URL = process.env.DATABASE_URL || 'postgres://postgres:sprmr453@localhost:5432/Swifties';
+export const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://postgres:iIFBxqCbVBgOHKSMbLNFoXguUhyumcMT@autorack.proxy.rlwy.net:12822/railway';
+
+//'postgres://postgres:sprmr453@localhost:5432/Swifties';
